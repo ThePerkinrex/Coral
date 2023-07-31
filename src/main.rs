@@ -10,6 +10,9 @@ mod ast;
 mod fs;
 mod lexer;
 mod span;
+mod parser;
+
+type FileArena = Arena<File>;
 
 fn main() {
     println!("Hello, world!");

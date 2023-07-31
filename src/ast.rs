@@ -1,4 +1,5 @@
-pub enum Item {}
+pub enum Item {
+}
 
 pub enum Statement {}
 

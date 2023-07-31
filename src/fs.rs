@@ -16,7 +16,7 @@ impl SourceCode for File {
         context_lines_after: usize,
     ) -> Result<Box<dyn miette::SpanContents<'a> + 'a>, miette::MietteError> {
         self.contents
-            .read_span(span, context_lines_before, context_lines_after)
+            .read_span(span, context_lines_before, context_lines_after).map(|span| NamedSpan::new(&self.name, span) as Box<dyn miette::SpanContents<'a> + 'a>)
     }
 }
 
