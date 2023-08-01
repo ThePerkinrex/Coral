@@ -1,9 +1,12 @@
-use std::ops::{Index, DerefMut, Deref};
+use std::ops::{Deref, DerefMut, Index};
 
-use crate::{fs::{File, FileId}, span::Span};
+use crate::{
+    fs::{File, FileId},
+    span::Span,
+};
 use logos::{Lexer, Logos, SpannedIter};
 
-#[derive(Logos, Debug, PartialEq, Eq)]
+#[derive(Logos, Clone, Copy, Debug, PartialEq, Eq)]
 #[logos(skip r"[ \t\n\f]+", extras = FileId)] // Ignore this regex pattern between tokens
 pub enum Token {
     #[token("fn")]
@@ -130,7 +133,6 @@ mod test {
     }
 }
 
-
 pub struct SpannedIterExt<'source, Token: Logos<'source>>(SpannedIter<'source, Token>, FileId);
 
 impl<'source, Token: Logos<'source>> Deref for SpannedIterExt<'source, Token> {
@@ -153,7 +155,9 @@ impl<'source, Token: Logos<'source>> Iterator for SpannedIterExt<'source, Token>
     type Item = SpannedToken<'source, Token>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|(token, range)| Span::new(self.1, range, token))
+        self.0
+            .next()
+            .map(|(token, range)| Span::new(self.1, range, token))
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
@@ -166,7 +170,9 @@ impl<'source, Token: Logos<'source>> SpannedIterExt<'source, Token> {
     }
 }
 
-impl<'source, Token: Logos<'source, Extras = FileId>> From<SpannedIter<'source, Token>> for SpannedIterExt<'source, Token> {
+impl<'source, Token: Logos<'source, Extras = FileId>> From<SpannedIter<'source, Token>>
+    for SpannedIterExt<'source, Token>
+{
     fn from(iter: SpannedIter<'source, Token>) -> Self {
         let extras = iter.extras;
         Self::new(iter, extras)

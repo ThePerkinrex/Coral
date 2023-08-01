@@ -16,22 +16,20 @@ impl SourceCode for File {
         context_lines_after: usize,
     ) -> Result<Box<dyn miette::SpanContents<'a> + 'a>, miette::MietteError> {
         self.contents
-            .read_span(span, context_lines_before, context_lines_after).map(|span| NamedSpan::new(&self.name, span) as Box<dyn miette::SpanContents<'a> + 'a>)
+            .read_span(span, context_lines_before, context_lines_after)
+            .map(|span| NamedSpan::new(&self.name, span) as Box<dyn miette::SpanContents<'a> + 'a>)
     }
 }
 
 pub struct NamedSpan<'a> {
-	name: &'a str,
-	inner: Box<dyn miette::SpanContents<'a> + 'a>,
+    name: &'a str,
+    inner: Box<dyn miette::SpanContents<'a> + 'a>,
 }
 
 impl<'a> NamedSpan<'a> {
-	pub fn new(name: &'a str, inner: Box<dyn miette::SpanContents<'a> + 'a>) -> Box<Self> {
-		Box::new(Self {
-			name,
-			inner
-		})
-	}
+    pub fn new(name: &'a str, inner: Box<dyn miette::SpanContents<'a> + 'a>) -> Box<Self> {
+        Box::new(Self { name, inner })
+    }
 }
 
 impl<'a> SpanContents<'a> for NamedSpan<'a> {

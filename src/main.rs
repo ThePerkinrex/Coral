@@ -7,11 +7,11 @@ use crate::{
 };
 
 mod ast;
+mod error;
 mod fs;
 mod lexer;
-mod span;
 mod parser;
-mod error;
+mod span;
 
 type FileArena = Arena<File>;
 
