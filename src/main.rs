@@ -11,6 +11,7 @@ mod fs;
 mod lexer;
 mod span;
 mod parser;
+mod error;
 
 type FileArena = Arena<File>;
 
