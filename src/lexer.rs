@@ -2,9 +2,11 @@ use std::ops::{Deref, DerefMut, Index};
 
 use crate::{
     fs::{File, FileId},
-    span::Span,
+    span::Spanned,
 };
 use logos::{Lexer, Logos, SpannedIter};
+
+pub mod tokens;
 
 #[derive(Logos, Clone, Copy, Debug, PartialEq, Eq)]
 #[logos(skip r"[ \t\n\f]+", extras = FileId)] // Ignore this regex pattern between tokens
@@ -149,7 +151,7 @@ impl<'source, Token: Logos<'source>> DerefMut for SpannedIterExt<'source, Token>
     }
 }
 
-pub type SpannedToken<'source, Token> = Span<Result<Token, <Token as Logos<'source>>::Error>>;
+pub type SpannedToken<'source, Token> = Spanned<Result<Token, <Token as Logos<'source>>::Error>>;
 
 impl<'source, Token: Logos<'source>> Iterator for SpannedIterExt<'source, Token> {
     type Item = SpannedToken<'source, Token>;
@@ -157,7 +159,7 @@ impl<'source, Token: Logos<'source>> Iterator for SpannedIterExt<'source, Token>
     fn next(&mut self) -> Option<Self::Item> {
         self.0
             .next()
-            .map(|(token, range)| Span::new(self.1, range, token))
+            .map(|(token, range)| Spanned::new(self.1, range, token))
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.0.size_hint()
