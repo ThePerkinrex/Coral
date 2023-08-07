@@ -135,48 +135,48 @@ mod test {
     }
 }
 
-pub struct SpannedIterExt<'source, Token: Logos<'source>>(SpannedIter<'source, Token>, FileId);
+// pub struct SpannedIterExt<'source, Token: Logos<'source>>(SpannedIter<'source, Token>, FileId);
 
-impl<'source, Token: Logos<'source>> Deref for SpannedIterExt<'source, Token> {
-    type Target = Lexer<'source, Token>;
+// impl<'source, Token: Logos<'source>> Deref for SpannedIterExt<'source, Token> {
+//     type Target = Lexer<'source, Token>;
 
-    fn deref(&self) -> &Self::Target {
-        self.0.deref()
-    }
-}
+//     fn deref(&self) -> &Self::Target {
+//         self.0.deref()
+//     }
+// }
 
-impl<'source, Token: Logos<'source>> DerefMut for SpannedIterExt<'source, Token> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.0.deref_mut()
-    }
-}
+// impl<'source, Token: Logos<'source>> DerefMut for SpannedIterExt<'source, Token> {
+//     fn deref_mut(&mut self) -> &mut Self::Target {
+//         self.0.deref_mut()
+//     }
+// }
 
-pub type SpannedToken<'source, Token> = Spanned<Result<Token, <Token as Logos<'source>>::Error>>;
+// pub type SpannedToken<'source, Token> = Spanned<Result<Token, <Token as Logos<'source>>::Error>>;
 
-impl<'source, Token: Logos<'source>> Iterator for SpannedIterExt<'source, Token> {
-    type Item = SpannedToken<'source, Token>;
+// impl<'source, Token: Logos<'source>> Iterator for SpannedIterExt<'source, Token> {
+//     type Item = SpannedToken<'source, Token>;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0
-            .next()
-            .map(|(token, range)| Spanned::new(self.1, range, token))
-    }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.0.size_hint()
-    }
-}
+//     fn next(&mut self) -> Option<Self::Item> {
+//         self.0
+//             .next()
+//             .map(|(token, range)| Spanned::new(self.1, range, token))
+//     }
+//     fn size_hint(&self) -> (usize, Option<usize>) {
+//         self.0.size_hint()
+//     }
+// }
 
-impl<'source, Token: Logos<'source>> SpannedIterExt<'source, Token> {
-    pub const fn new(iter: SpannedIter<'source, Token>, id: FileId) -> Self {
-        Self(iter, id)
-    }
-}
+// impl<'source, Token: Logos<'source>> SpannedIterExt<'source, Token> {
+//     pub const fn new(iter: SpannedIter<'source, Token>, id: FileId) -> Self {
+//         Self(iter, id)
+//     }
+// }
 
-impl<'source, Token: Logos<'source, Extras = FileId>> From<SpannedIter<'source, Token>>
-    for SpannedIterExt<'source, Token>
-{
-    fn from(iter: SpannedIter<'source, Token>) -> Self {
-        let extras = iter.extras;
-        Self::new(iter, extras)
-    }
-}
+// impl<'source, Token: Logos<'source, Extras = FileId>> From<SpannedIter<'source, Token>>
+//     for SpannedIterExt<'source, Token>
+// {
+//     fn from(iter: SpannedIter<'source, Token>) -> Self {
+//         let extras = iter.extras;
+//         Self::new(iter, extras)
+//     }
+// }

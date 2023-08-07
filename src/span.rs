@@ -7,12 +7,16 @@ use crate::{fs::FileId, FileArena};
 pub struct Span {
     file: FileId,
     start: usize,
-    end: usize
+    end: usize,
 }
 
 impl Span {
     pub const fn new(file: FileId, range: Range<usize>) -> Self {
-        Self { file, start: range.start, end: range.end }
+        Self {
+            file,
+            start: range.start,
+            end: range.end,
+        }
     }
     const fn range(&self) -> Range<usize> {
         self.start..self.end
@@ -49,10 +53,7 @@ impl Span {
     }
 
     pub const fn spanned<T>(self, data: T) -> Spanned<T> {
-        Spanned {
-            span: self,
-            data
-        }
+        Spanned { span: self, data }
     }
 }
 
@@ -70,7 +71,10 @@ impl<T> From<(FileId, Range<usize>, T)> for Spanned<T> {
 
 impl<T> Spanned<T> {
     pub const fn new(file: FileId, range: Range<usize>, data: T) -> Self {
-        Self { span: Span::new(file, range), data }
+        Self {
+            span: Span::new(file, range),
+            data,
+        }
     }
 
     pub fn get_slice<'a>(&self, arena: &'a FileArena) -> &'a str {
@@ -96,7 +100,7 @@ impl<T> Spanned<T> {
 
     #[must_use]
     pub fn from_ends<U, V>(start: Spanned<U>, end: Spanned<V>, data: T) -> Option<Self> {
-        Span::from_ends(start.span, end.span).map(|span| Self {span, data})
+        Span::from_ends(start.span, end.span).map(|span| Self { span, data })
     }
 
     pub const fn copy_new_data<U>(&self, data: U) -> Spanned<U> {

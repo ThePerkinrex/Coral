@@ -4,7 +4,9 @@ use crate::parser::ParseError;
 
 pub trait Context {
     type Error;
-    type Or<'t>: Or + 't where Self: 't;
+    type Or<'t>: Or + 't
+    where
+        Self: 't;
 
     fn message<T: Into<CoralError>>(&mut self, msg: T) -> Self::Error;
     fn report<T, E: Into<CoralError>>(&mut self, res: Result<T, E>) -> Result<T, Self::Error>;

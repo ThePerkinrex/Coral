@@ -5,13 +5,13 @@ use thiserror::Error;
 use crate::{
     ast::{Expression, Identifier, Item, Statement, Type},
     error::Context,
-    lexer::{SpannedToken, Token},
-    span::Spanned,
+    lexer::{tokens::TokenReader, Token},
+    span::{Spanned, Span},
     FileArena,
 };
 
 pub fn parse_item<'source, C: Context>(
-    tokens: &mut Peekable<impl Iterator<Item = SpannedToken<'source, Token>>>,
+    tokens: &mut impl TokenReader<'source, Token>,
     context: &mut C,
     files: &'source FileArena,
 ) -> Result<Spanned<Item<'source>>, C::Error> {
@@ -39,7 +39,7 @@ pub fn parse_item<'source, C: Context>(
 }
 
 pub fn parse_statement<'source, C: Context>(
-    tokens: &mut Peekable<impl Iterator<Item = SpannedToken<'source, Token>>>,
+    tokens: &mut impl TokenReader<'source, Token>,
     context: &mut C,
     files: &'source FileArena,
 ) -> Result<Spanned<Statement<'source>>, C::Error> {
@@ -58,7 +58,7 @@ pub fn parse_statement<'source, C: Context>(
 }
 
 pub fn parse_expression<'source, C: Context>(
-    tokens: &mut Peekable<impl Iterator<Item = SpannedToken<'source, Token>>>,
+    tokens: &mut impl TokenReader<'source, Token>,
     context: &mut C,
     files: &'source FileArena,
 ) -> Result<Spanned<Expression<'source>>, C::Error> {
@@ -81,53 +81,38 @@ pub fn parse_expression<'source, C: Context>(
 }
 
 pub fn parse_identifier<'source, C: Context>(
-    tokens: &mut Peekable<impl Iterator<Item = SpannedToken<'source, Token>>>,
+    tokens: &mut impl TokenReader<'source, Token>,
     context: &mut C,
     files: &'source FileArena,
 ) -> Result<Spanned<Identifier<'source>>, C::Error> {
-    let mut advance = 0;
-    let res = match tokens.peek() {
-        Some(span) => match span.data {
-            Ok(token) => match token {
-                Token::Identifier => {
-                    advance = 1;
-                    Ok(span.copy_new_data(span.get_slice(files).into()))
-                }
-                _ => Err(context.message(ParseError::UnexpectedToken(span.copy_new_data(token)))),
-            },
-            Err(()) => Err(context.message(ParseError::InvalidToken(span.copy_new_data(())))),
+    match tokens.current() {
+        Some((Ok(&token), span)) => match token {
+            Token::Identifier => {
+                Ok(span.spanned(tokens.current_slice().unwrap().into()))
+            }
+            _ => Err(context.message(ParseError::UnexpectedToken(span.spanned(token)))),
         },
+        Some((Err(()), span)) => Err(context.message(ParseError::InvalidToken(span))),
         None => Err(context.message(ParseError::UnexpectedEOI)),
-    };
-    for _ in 0..advance {
-        tokens.next();
     }
-    res
 }
 
 pub fn parse_type<'source, C: Context>(
-    tokens: &mut Peekable<impl Iterator<Item = SpannedToken<'source, Token>>>,
+    tokens: &mut impl TokenReader<'source, Token>,
     context: &mut C,
     files: &'source FileArena,
 ) -> Result<Spanned<Type<'source>>, C::Error> {
-    let mut advance = 0;
-    let res = match tokens.peek() {
-        Some(span) => match span.data {
-            Ok(token) => match token {
-                Token::Identifier => {
-                    advance = 1;
-                    Ok(span.copy_new_data(span.get_slice(files).into()))
-                }
-                _ => Err(context.message(ParseError::UnexpectedToken(span.copy_new_data(token)))),
-            },
-            Err(()) => Err(context.message(ParseError::InvalidToken(span.copy_new_data(())))),
+    match tokens.current() {
+        Some((Ok(&token), span)) => match token {
+            Token::Identifier => {
+                // TODO advance it?
+                Ok(span.spanned(tokens.current_slice().unwrap().into()))
+            }
+            _ => Err(context.message(ParseError::UnexpectedToken(span.spanned(token)))),
         },
+        Some((Err(()), span)) => Err(context.message(ParseError::InvalidToken(span))),
         None => Err(context.message(ParseError::UnexpectedEOI)),
-    };
-    for _ in 0..advance {
-        tokens.next();
     }
-    res
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
@@ -137,5 +122,5 @@ pub enum ParseError {
     #[error("Unexpected token")]
     UnexpectedToken(Spanned<Token>),
     #[error("Invalid token")]
-    InvalidToken(Spanned<()>),
+    InvalidToken(Span),
 }
