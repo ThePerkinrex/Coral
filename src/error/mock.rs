@@ -7,6 +7,10 @@ impl Context for MockContext {
     type Error = ();
     type Or<'ctx> = MockOr<'ctx>;
 
+    fn enter_context<S: std::fmt::Display>(&mut self, _: S) {}
+
+    fn exit_ctx(&mut self) {}
+
     fn message<T: Into<CoralError>>(&mut self, _: T) -> Self::Error {}
 
     fn report<T, E: Into<CoralError>>(&mut self, res: Result<T, E>) -> Result<T, Self::Error> {
@@ -56,4 +60,8 @@ impl<C: Context> Context for OptionCtx<C> {
     fn or(&mut self) -> Self::Or<'_> {
         self.ctx.or()
     }
+
+    fn enter_context<S: std::fmt::Display>(&mut self, _: S) {}
+
+    fn exit_ctx(&mut self) {}
 }

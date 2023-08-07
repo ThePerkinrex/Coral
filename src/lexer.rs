@@ -41,6 +41,8 @@ pub enum Token {
     Colon,
     #[token("::")]
     PathSep,
+    #[token(",")]
+    Comma,
 
     #[regex("[_a-zA-Z][_0-9a-zA-z]*")]
     Identifier,

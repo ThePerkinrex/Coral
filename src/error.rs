@@ -8,9 +8,17 @@ pub trait Context {
     where
         Self: 't;
 
+    fn enter_context<S: std::fmt::Display>(&mut self, name: S);
+    fn exit_ctx(&mut self);
     fn message<T: Into<CoralError>>(&mut self, msg: T) -> Self::Error;
     fn report<T, E: Into<CoralError>>(&mut self, res: Result<T, E>) -> Result<T, Self::Error>;
     fn or(&mut self) -> Self::Or<'_>;
+    fn context<T, F: FnOnce(&mut Self) -> T, S: std::fmt::Display>(&mut self, name: S, f: F) -> T {
+        self.enter_context(name);
+        let r = f(self);
+        self.exit_ctx();
+        r
+    }
 }
 
 pub trait Or {
@@ -28,3 +36,6 @@ pub enum CoralError {
 
 mod mock;
 pub use mock::MockContext;
+
+mod printing;
+pub use printing::PrintingContext;
