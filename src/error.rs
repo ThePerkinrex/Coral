@@ -1,63 +1,31 @@
-#[derive(Debug, PartialEq, Eq)]
-pub struct ErrorGatherer<E> {
-    errors: Vec<E>,
+use thiserror::Error;
+
+use crate::parser::ParseError;
+
+pub trait Context {
+    type Error;
+
+    fn message<T: Into<CoralError>>(&mut self, msg: T) -> Self::Error;
+    fn report<T, E: Into<CoralError>>(&mut self, res: Result<T, E>) -> Result<T, Self::Error>;
 }
 
-impl<E> Default for ErrorGatherer<E> {
-    fn default() -> Self {
-        Self {
-            errors: Default::default(),
-        }
-    }
+#[derive(Debug, Clone, PartialEq, Eq, Error)]
+pub enum CoralError {
+    #[error(transparent)]
+    ParserError(#[from] ParseError)
 }
 
-impl<E> ErrorGatherer<E> {
-    pub fn new() -> Self {
-        Default::default()
+#[derive(Debug, Default)]
+pub struct MockContext;
+
+impl Context for MockContext {
+    type Error = ();
+
+    fn message<T: Into<CoralError>>(&mut self, msg: T) -> Self::Error {
+        
     }
 
-    fn store<Error: Into<E>>(&mut self, res: Vec<Error>) {
-        self.errors.extend(res.into_iter().map(Into::into))
+    fn report<T, E: Into<CoralError>>(&mut self, res: Result<T, E>) -> Result<T, Self::Error> {
+        Err(())
     }
-
-    pub fn add<Error: Into<E>>(&mut self, error: Error) {
-        self.errors.push(error.into())
-    }
-
-    #[must_use]
-    pub fn gather<T, Error: Into<E>>(&mut self, res: CoralResult<T, Error>) -> Option<T> {
-        match res {
-            CoralResult::Ok(x) => Some(x),
-            CoralResult::Err(e) => {
-                self.store(e);
-                None
-            }
-            CoralResult::Warning(x, e) => {
-                self.store(e);
-                Some(x)
-            }
-        }
-    }
-
-    #[allow(clippy::missing_const_for_fn)]
-    pub fn unrecoverable<T>(self) -> CoralResult<T, E> {
-        CoralResult::Err(self.errors)
-    }
-
-    #[allow(clippy::missing_const_for_fn)]
-    pub fn result<T>(self, data: T) -> CoralResult<T, E> {
-        if self.errors.is_empty() {
-            CoralResult::Ok(data)
-        } else {
-            CoralResult::Warning(data, self.errors)
-        }
-    }
-}
-
-#[must_use]
-#[derive(Debug, PartialEq, Eq)]
-pub enum CoralResult<T, E> {
-    Ok(T),
-    Err(Vec<E>),
-    Warning(T, Vec<E>),
 }

@@ -16,7 +16,7 @@ pub enum Statement<'a> {
 }
 
 pub enum Expression<'a> {
-	Name(Span<Identifier<'a>>)
+	Name(Span<Identifier<'a>>),
 }
 
 pub struct Identifier<'a>(Cow<'a, str>);
