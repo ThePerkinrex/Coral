@@ -1,10 +1,7 @@
-use std::ops::{Deref, DerefMut, Index};
+use std::ops::Index;
 
-use crate::{
-    fs::{File, FileId},
-    span::Spanned,
-};
-use logos::{Lexer, Logos, SpannedIter};
+use crate::fs::{File, FileId};
+use logos::{Lexer, Logos};
 
 pub mod tokens;
 

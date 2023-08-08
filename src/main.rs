@@ -1,11 +1,12 @@
-use id_arena::{Arena, DefaultArenaBehavior};
-use logos::Logos;
+use id_arena::Arena;
 
 use crate::{
-    error::{MockContext, PrintingContext},
-    fs::{File, FileId},
+    error::PrintingContext,
+    // error::{MockContext, PrintingContext},
+    fs::File,
     lexer::{tokens::Tokens, Token},
     parser::parse_item,
+    transaction::ParserState,
 };
 
 mod ast;
@@ -14,6 +15,7 @@ mod fs;
 mod lexer;
 mod parser;
 mod span;
+mod transaction;
 
 type FileArena = Arena<File>;
 
@@ -39,8 +41,14 @@ fn main() {
     // }
     // println!();
 
-    let parse_a = parse_item(&mut Tokens::from(lex_a), &mut PrintingContext::default());
+    let parse_a = parse_item(&mut ParserState::new(
+        PrintingContext::default(),
+        Tokens::from(lex_a),
+    ));
     println!("{parse_a:#?}");
-    let parse_b = parse_item(&mut Tokens::from(lex_b), &mut PrintingContext::default());
+    let parse_b = parse_item(&mut ParserState::new(
+        PrintingContext::default(),
+        Tokens::from(lex_b),
+    ));
     println!("{parse_b:#?}")
 }
